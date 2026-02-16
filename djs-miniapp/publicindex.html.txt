@@ -1,0 +1,42 @@
+<html>
+<head>
+<title>Djs task easy money</title>
+</head>
+<body>
+<h2>Djs task easy money</h2>
+
+<p id="name"></p>
+<p>Balance: ₹ <span id="bal">0</span></p>
+
+<button onclick="watchAd()">Watch Ad</button>
+<button onclick="wallet()">Wallet</button>
+
+<script>
+const user = Telegram.WebApp.initDataUnsafe.user;
+
+fetch("/user", {
+  method:"POST",
+  headers:{'Content-Type':'application/json'},
+  body: JSON.stringify({id:user.id,name:user.first_name})
+});
+
+function loadBal(){
+ fetch("/balance/"+user.id)
+ .then(r=>r.json())
+ .then(d=> document.getElementById("bal").innerText = d.balance || 0);
+}
+
+function watchAd(){
+  // yaha monetag code aayega
+  fetch("/earn",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({id:user.id})});
+  loadBal();
+}
+
+function wallet(){
+  window.location="wallet.html?id="+user.id;
+}
+
+loadBal();
+</script>
+</body>
+</html>

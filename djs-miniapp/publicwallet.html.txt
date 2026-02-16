@@ -1,0 +1,22 @@
+<html>
+<body>
+<h2>Withdraw</h2>
+
+UPI / PayPal:
+<input id="acc"><br><br>
+
+<button onclick="go()">Withdraw</button>
+
+<script>
+const id = new URLSearchParams(window.location.search).get("id");
+
+function go(){
+ fetch("/withdraw",{
+   method:"POST",
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({id:Number(id),method:"upi",account:acc.value})
+ }).then(r=>r.text()).then(alert);
+}
+</script>
+</body>
+</html>

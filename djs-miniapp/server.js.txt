@@ -1,0 +1,64 @@
+const express = require("express");
+const bodyParser = require("body-parser");
+const Lowdb = require("lowdb");
+const FileSync = require("lowdb/adapters/FileSync");
+
+const adapter = new FileSync("db.json");
+const db = Lowdb(adapter);
+
+db.defaults({ users: [], withdraws: [] }).write();
+
+const app = express();
+app.use(bodyParser.json());
+app.use(express.static("public"));
+
+// register user
+app.post("/user", (req, res) => {
+  const { id, name } = req.body;
+
+  let user = db.get("users").find({ id }).value();
+  if (!user) {
+    db.get("users")
+      .push({ id, name, balance: 0 })
+      .write();
+  }
+  res.send("ok");
+});
+
+// add earning
+app.post("/earn", (req, res) => {
+  const { id } = req.body;
+  db.get("users")
+    .find({ id })
+    .update("balance", b => b + 0.2)
+    .write();
+
+  res.send("added");
+});
+
+// get balance
+app.get("/balance/:id", (req, res) => {
+  const user = db.get("users").find({ id: Number(req.params.id) }).value();
+  res.json(user || {});
+});
+
+// withdraw
+app.post("/withdraw", (req, res) => {
+  const { id, method, account } = req.body;
+
+  const user = db.get("users").find({ id }).value();
+
+  if (user.balance < 25) {
+    return res.send("minimum not reached");
+  }
+
+  db.get("withdraws")
+    .push({ id, method, account, amount: user.balance, status: "pending" })
+    .write();
+
+  db.get("users").find({ id }).assign({ balance: 0 }).write();
+
+  res.send("requested");
+});
+
+app.listen(3000, () => console.log("server started"));
